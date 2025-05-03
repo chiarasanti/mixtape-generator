@@ -675,12 +675,11 @@ export default function MixtapeGenerator() {
                   onClick={generateHtml}
                   className="bg-white hover:bg-white hover:underline hover:cursor-pointer text-black px-8 py-6 text-base"
                 >
-                  Download Mixtape
+                  Download HTML file
                 </Button>
 
                 <div className="text-xs text-gray-500">
-                  The HTML file contains your mixtape. Send it to your loved on
-                  and enjoy.
+                  The HTML file contains your mixtape. Send it to your loved one and enjoy.
                 </div>
               </div>
             </div>
@@ -703,7 +702,7 @@ export default function MixtapeGenerator() {
             </button>
           ) : (
             <button onClick={resetMixtape} className="text-gray-800">
-              Create New Mixtape
+              Create new mixtape
             </button>
           )}
         </div>
