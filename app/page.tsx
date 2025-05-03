@@ -216,45 +216,37 @@ export default function MixtapeGenerator() {
       reader.readAsDataURL(cassetteImageBlob);
     });
 
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString("en-GB").replace(/\//g, ".");
+
     const html = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${mixtapeTitle || "Your Mixtape"}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cutive+Mono&family=La+Belle+Aurore&display=swap" rel="stylesheet">
-  <style>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${mixtapeTitle || "Your Mixtape"}</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Cutive+Mono&family=La+Belle+Aurore&display=swap" rel="stylesheet">
+      <style>
     body {
-      font-family: 'Cutive Mono', monospace;
+      font-family: 'La Belle Aurore', cursive;
       margin: 0;
       padding: 0;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
       background-color: ${getBackgroundColorHex(backgroundColor)};
-      color: #333;
+      color: #000;
     }
     .container {
       max-width: 500px;
       width: 90%;
       text-align: center;
-    }
-    h1 {
-      margin-top: 0;
-      font-size: 2rem;
-      font-family: 'Cutive Mono', monospace;
-    }
-    .message {
-      margin: 1.5rem 0;
-      font-style: italic;
-      line-height: 1.6;
-      font-family: 'La Belle Aurore', cursive;
-      font-size: 1.5rem;
     }
     .cassette {
       width: 100%;
@@ -268,84 +260,79 @@ export default function MixtapeGenerator() {
     }
     .cassette-title {
       position: absolute;
-      top: 22%;
+      top: 20%;
       left: 50%;
       transform: translate(-50%, -50%);
       font-family: 'La Belle Aurore', cursive;
       font-size: 1.125rem;
       color: white;
+      pointer-events: none;
       text-align: center;
-      width: 80%;
+    }
+    .date {
+      font-size: 1rem;
+      text-align: center;
+      color: #000;
+      line-height: 0;
+      margin-top: 16px;
     }
     .player {
-      margin-top: 2rem;
+      margin-top: 16px;
       width: 100%;
     }
     .controls {
       display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 1rem;
+      gap: 40px;
       margin: 1rem 0;
     }
-    button {
-      background-color: #6c5ce7;
-      color: white;
+    .control-btn {
+      background: none;
       border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      cursor: pointer;
+      color: #000;
       font-size: 1rem;
-      font-family: 'Cutive Mono', monospace;
-    }
-    button:hover {
-      background-color: #5541d8;
-    }
-    .playlist {
-      margin-top: 1.5rem;
-      text-align: left;
-    }
-    .song {
-      padding: 0.5rem;
-      margin: 0.5rem 0;
-      background-color: rgba(255, 255, 255, 0.7);
-      border-radius: 4px;
       cursor: pointer;
-      font-family: 'Cutive Mono', monospace;
+      font-family: 'La Belle Aurore', cursive;
+      transition: color 0.2s;
+      padding: 0 8px;
+      outline: none;
     }
-    .song.playing {
-      background-color: #e9e7ff;
-      font-weight: bold;
+    .control-btn:active {
+      color: #6c5ce7;
+    }
+    .play-label {
+      font-size: 1rem;
+      margin: 0 4px;
+      min-width: 60px;
+      text-align: center;
+      font-family: 'La Belle Aurore', cursive;
+    }
+    @media (max-width: 400px) {
+      .cassette img, .cassette-container {
+        width: 95vw;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <p>A mixtape for you</p>
     <div class="cassette">
       <img src="${mixtapeImageBase64}" alt="Mixtape Cassette">
       <div class="cassette-title">${mixtapeTitle || ""}</div>
     </div>
     
+    <div class="date">${formattedDate}</div>
     <div class="player">
       <audio id="audio-player"></audio>
       
       <div class="controls">
-        <button id="prev-btn">Previous</button>
-        <button id="play-btn">Play</button>
-        <button id="pause-btn">Pause</button>
-        <button id="next-btn">Next</button>
-      </div>
-      
-      <div class="playlist" id="playlist">
-        ${songs
-          .map(
-            (song, index) => `
-          <div class="song" data-index="${index}">
-            ${index + 1}. ${song.name}
-          </div>
-        `
-          )
-          .join("")}
+        <button class="control-btn" id="prev-btn" title="Previous">&#9198;</button>
+        <button class="control-btn" id="play-btn" title="Play/Pause">
+          <span id="play-icon">&#9205;</span>
+          <span class="play-label" id="play-label">play</span>
+        </button>
+        <button class="control-btn" id="next-btn" title="Next">&#9197;</button>
       </div>
     </div>
   </div>
@@ -362,11 +349,10 @@ export default function MixtapeGenerator() {
     // Player elements
     const audioPlayer = document.getElementById('audio-player');
     const playBtn = document.getElementById('play-btn');
-    const pauseBtn = document.getElementById('pause-btn');
+    const playIcon = document.getElementById('play-icon');
+    const playLabel = document.getElementById('play-label');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
-    const playlist = document.getElementById('playlist');
-    const songElements = document.querySelectorAll('.song');
     
     // Current song index
     let currentSongIndex = 0;
@@ -381,57 +367,69 @@ export default function MixtapeGenerator() {
       if (index >= 0 && index < songs.length) {
         audioPlayer.src = songs[index].dataUrl;
         currentSongIndex = index;
-        
-        // Update playlist UI
-        songElements.forEach((el, i) => {
-          if (i === index) {
-            el.classList.add('playing');
-          } else {
-            el.classList.remove('playing');
-          }
-        });
+      }
+    }
+
+    function updatePlayPause() {
+      if (audioPlayer.paused) {
+        playIcon.innerHTML = '&#9205;'; // play
+        playLabel.textContent = 'play';
+      } else {
+        playIcon.innerHTML = '&#9208;'; // pause
+        playLabel.textContent = 'pause';
       }
     }
     
-    // Play button
     playBtn.addEventListener('click', () => {
-      audioPlayer.play();
-    });
-    
-    // Pause button
-    pauseBtn.addEventListener('click', () => {
-      audioPlayer.pause();
+      if (audioPlayer.src === '' && songs.length > 0) {
+        loadSong(currentSongIndex);
+      }
+      if (audioPlayer.paused) {
+        audioPlayer.play();
+      } else {
+        audioPlayer.pause();
+      }
+      updatePlayPause();
     });
     
     // Previous button
     prevBtn.addEventListener('click', () => {
-      loadSong(currentSongIndex - 1);
+      if (songs.length === 0) return;
+      let newIndex = currentSongIndex - 1;
+      if (newIndex < 0) newIndex = songs.length - 1;
+      loadSong(newIndex);
       audioPlayer.play();
+      updatePlayPause();
     });
     
     // Next button
     nextBtn.addEventListener('click', () => {
-      loadSong(currentSongIndex + 1);
+      if (songs.length === 0) return;
+      let newIndex = currentSongIndex + 1;
+      if (newIndex >= songs.length) newIndex = 0;
+      loadSong(newIndex);
       audioPlayer.play();
+      updatePlayPause();
     });
     
     // Song ended event
+    audioPlayer.addEventListener('play', updatePlayPause);
+    audioPlayer.addEventListener('pause', updatePlayPause);
     audioPlayer.addEventListener('ended', () => {
       // Auto play next song
-      if (currentSongIndex < songs.length - 1) {
-        loadSong(currentSongIndex + 1);
+      if (songs.length > 0) {
+        let newIndex = currentSongIndex + 1;
+        if (newIndex >= songs.length) newIndex = 0;
+        loadSong(newIndex);
         audioPlayer.play();
       }
     });
     
-    // Playlist click events
-    songElements.forEach(song => {
-      song.addEventListener('click', () => {
-        const index = parseInt(song.dataset.index);
-        loadSong(index);
-        audioPlayer.play();
-      });
-    });
+    // Load first song if available
+    if (songs.length > 0) {
+      loadSong(0);
+    }
+    updatePlayPause();
   </script>
 </body>
 </html>
