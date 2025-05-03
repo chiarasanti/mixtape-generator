@@ -12,8 +12,7 @@ const cutiveMono = Cutive_Mono({
 
 export const metadata: Metadata = {
   title: "Mixtape Generator",
-  description: "Create a custom mixtape for your loved ones",
-    generator: 'v0.dev'
+  description: "Create a custom mixtape for your loved ones"
 }
 
 export default function RootLayout({
